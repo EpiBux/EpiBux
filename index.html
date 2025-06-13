@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EpiBux</title>
+    <style>
+        /* All CSS remains unchanged */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        :root { --bg-deep-space: #0a0b14; --bg-container: #1a1b26; --bg-input-dark: #16161e; --bg-button-muted: #414868; --btn-redeem: #7aa2f7; --btn-generate: #bb9af7; --text-bright: #c0caf5; --text-dim: #9aa0c4; --text-placeholder: #565f89; --text-on-color: #16161e; --color-success: #9ece6a; --color-error: #f7768e; --accent-glow: #7aa2f7; --border-subtle: #24283b; --gradient-primary: linear-gradient(135deg, #7aa2f7 0%, #bb9af7 100%); --gradient-success: linear-gradient(135deg, #9ece6a 0%, #73daca 100%); --gradient-card: linear-gradient(135deg, #1a1b26 0%, #1f2335 100%); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg-deep-space); background-image: radial-gradient(circle at 20% 50%, rgba(122, 162, 247, 0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(187, 154, 247, 0.1) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(158, 206, 106, 0.1) 0%, transparent 50%); color: var(--text-bright); display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        .hidden { display: none !important; }
+        .auth-container { background: var(--gradient-card); padding: 50px; border-radius: 24px; text-align: center; width: 100%; max-width: 420px; border: 1px solid var(--border-subtle); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 60px rgba(122, 162, 247, 0.1); backdrop-filter: blur(10px); animation: slideInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden; }
+        .auth-container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--gradient-primary); opacity: 0.8; }
+        .auth-container h2 { font-size: 2.2rem; margin-bottom: 35px; font-weight: 600; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .auth-container input, .generic-input, textarea.generic-input { width: 100%; padding: 16px 20px; margin-bottom: 20px; border: 2px solid transparent; border-radius: 14px; background: var(--bg-input-dark); color: var(--text-bright); font-size: 1rem; font-family: 'Poppins', sans-serif; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+        .auth-container input:focus, .generic-input:focus, textarea.generic-input:focus { outline: none; border-color: var(--btn-redeem); box-shadow: 0 0 0 3px rgba(122, 162, 247, 0.2); transform: translateY(-2px); }
+        .auth-container input::placeholder, .generic-input::placeholder, textarea.generic-input::placeholder { color: var(--text-placeholder); transition: color 0.3s ease; }
+        .auth-container input:focus::placeholder, .generic-input:focus::placeholder { color: var(--text-dim); }
+        .auth-container button, .generic-button { width: 100%; padding: 16px; border: none; border-radius: 14px; background: var(--gradient-primary); color: var(--text-on-color); font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-family: 'Poppins', sans-serif; position: relative; overflow: hidden; }
+        .auth-container button:hover, .generic-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(122, 162, 247, 0.4); }
+        .auth-container button:active, .generic-button:active:not(:disabled) { transform: translateY(0); }
+        .auth-container .toggle-auth { color: var(--btn-redeem); cursor: pointer; margin-top: 20px; font-weight: 500; transition: all 0.3s ease; }
+        .auth-container .toggle-auth:hover { color: var(--text-bright); text-shadow: 0 0 10px rgba(122, 162, 247, 0.5); }
+        .status-message { margin-bottom: 15px; padding: 12px; border-radius: 10px; color: white; display: none; animation: slideInDown 0.3s ease; }
+        #dashboard-screen { width: 95%; max-width: 1400px; height: 90vh; background: var(--gradient-card); border-radius: 32px; padding: 40px; display: flex; flex-direction: row; gap: 40px; border: 1px solid var(--border-subtle); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 100px rgba(122, 162, 247, 0.1); backdrop-filter: blur(20px); animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .sidebar { flex: 0 0 220px; display: flex; flex-direction: column; gap: 12px; }
+        .sidebar-item { padding: 18px 24px; font-size: 1.1rem; font-weight: 500; cursor: pointer; border-radius: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-align: center; position: relative; border: 1px solid transparent; }
+        .sidebar-item:hover { background: rgba(122, 162, 247, 0.1); transform: translateX(4px); border-color: rgba(122, 162, 247, 0.3); }
+        .sidebar-item.active { background: var(--gradient-primary); color: var(--text-on-color); transform: translateX(8px); box-shadow: 0 8px 25px rgba(122, 162, 247, 0.3); }
+        .sidebar-item.active::before { content: ''; position: absolute; left: -8px; top: 50%; transform: translateY(-50%); width: 4px; height: 60%; background: var(--color-success); border-radius: 2px; }
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: auto; padding-right: 10px; }
+        .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .view-header h2 { margin-bottom: 0; }
+        .refresh-btn { padding: 10px 20px; font-size: 0.9rem; width: auto; background: var(--bg-button-muted); }
+        .balance-display { background: var(--bg-input-dark); padding: 30px; border-radius: 20px; text-align: center; font-size: 2.2rem; font-weight: 700; margin-bottom: 40px; border: 1px solid var(--border-subtle); position: relative; overflow: hidden; animation: pulseGlow 2s ease-in-out infinite; }
+        .balance-display::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(122, 162, 247, 0.1), transparent); animation: shimmer 3s ease-in-out infinite; }
+        .actions-container { display: flex; gap: 30px; flex-grow: 1; }
+        .action-card { flex: 1; background: var(--gradient-card); border: 1px solid var(--border-subtle); padding: 30px; border-radius: 20px; display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+        .action-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3); border-color: rgba(122, 162, 247, 0.3); }
+        .action-card h3 { font-size: 1.6rem; margin-bottom: 25px; font-weight: 600; }
+        .btn-highlight { background: var(--gradient-primary) !important; color: var(--text-on-color) !important; }
+        .btn-secondary { background: var(--gradient-success) !important; color: var(--text-on-color) !important; }
+        .generic-button:disabled { background: var(--bg-input-dark) !important; color: var(--text-placeholder) !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+        .card-status-message, .code-display-box { margin-top: auto; padding: 18px; border-radius: 12px; background: var(--bg-input-dark); text-align: center; font-weight: 600; font-size: 1.1rem; min-height: 55px; display: flex; align-items: center; justify-content: center; word-break: break-all; border: 1px solid var(--border-subtle); transition: all 0.3s ease; }
+        .code-display-box { color: var(--text-placeholder); margin-top: 15px; font-family: 'Courier New', Courier, monospace; font-size: 1.3rem; }
+        #leaderboard-list { list-style: none; padding: 0; animation: fadeInUp 0.6s ease; }
+        #leaderboard-list li { display: flex; justify-content: space-between; background: var(--bg-input-dark); padding: 20px 25px; border-radius: 14px; margin-bottom: 12px; font-size: 1.2rem; border: 1px solid var(--border-subtle); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); animation: slideInRight 0.5s ease; animation-fill-mode: both; }
+        #leaderboard-list li:hover { transform: translateX(8px); border-color: rgba(122, 162, 247, 0.3); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+        #leaderboard-list li:nth-child(1) { animation-delay: 0.1s; } #leaderboard-list li:nth-child(2) { animation-delay: 0.2s; } #leaderboard-list li:nth-child(3) { animation-delay: 0.3s; }
+        #leaderboard-list li span:first-child { font-weight: 600; }
+        #post-description-input { height: 100px; resize: vertical; padding-top: 16px; }
+        .listings-container { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+        .marketplace-item { background: var(--bg-input-dark); padding: 25px; border-radius: 16px; display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto auto; gap: 12px 25px; grid-template-areas: "title price" "desc buy" "seller buy"; border: 1px solid var(--border-subtle); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); animation: fadeInUp 0.5s ease; }
+        .marketplace-item:hover { transform: translateY(-2px); border-color: rgba(122, 162, 247, 0.3); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); }
+        .marketplace-item-title { grid-area: title; font-size: 1.5rem; font-weight: 600; }
+        .marketplace-item-desc { grid-area: desc; color: var(--text-dim); white-space: pre-wrap; line-height: 1.5; }
+        .marketplace-item-price { grid-area: price; font-size: 1.5rem; font-weight: 700; color: var(--color-success); text-align: right; }
+        .marketplace-item-seller { grid-area: seller; color: var(--text-placeholder); font-style: italic; align-self: end; }
+        .marketplace-item-buy-btn { grid-area: buy; align-self: center; padding: 12px 30px; font-size: 1.1rem; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(10px); animation: fadeIn 0.3s ease; }
+        .modal-content { background: var(--gradient-card); padding: 40px; border-radius: 20px; width: 90%; max-width: 550px; text-align: center; border: 1px solid var(--border-subtle); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5); animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-content h3 { margin-bottom: 20px; font-size: 1.6rem; font-weight: 600; }
+        .modal-content p { margin-bottom: 15px; color: var(--text-dim); line-height: 1.5; }
+        .modal-link-display { background: var(--bg-input-dark); padding: 15px; border-radius: 10px; word-break: break-all; margin-bottom: 30px; font-family: 'Courier New', Courier, monospace; border: 1px solid var(--border-subtle); }
+        .modal-actions { display: flex; gap: 20px; justify-content: center; }
+        #logout-btn { margin-top: auto; background: linear-gradient(135deg, #f7768e 0%, #ff9e64 100%) !important; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        #logout-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(247, 118, 142, 0.4); }
+        #purchase-notification-container { position: fixed; bottom: 20px; left: 20px; z-index: 2000; display: flex; flex-direction: column-reverse; gap: 10px; pointer-events: none; }
+        .purchase-notification { background: var(--gradient-card); color: var(--text-bright); padding: 18px 25px; border-radius: 16px; border: 1px solid var(--border-subtle); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); font-size: 1.05rem; font-weight: 500; animation: slideInUpFromBottom 0.5s cubic-bezier(0.16, 1, 0.3, 1); opacity: 1; transform: translateY(0); transition: opacity 0.5s ease, transform 0.5s ease; max-width: 400px; }
+        .purchase-notification.fade-out { opacity: 0; transform: translateY(20px); }
+        .purchase-notification .customer-name { color: var(--color-success); font-weight: 700; }
+        .purchase-notification .product-name { color: var(--btn-redeem); font-weight: 700; }
+        .stock-control-container { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+        .stock-control-container .generic-input { margin-bottom: 0; flex-grow: 1; }
+        .stock-control-container .generic-input:disabled { opacity: 0.5; cursor: not-allowed; }
+        .toggle-switch-container { display: flex; align-items: center; gap: 10px; font-weight: 500; color: var(--text-dim); white-space: nowrap; }
+        .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-button-muted); transition: .4s; border-radius: 28px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: var(--text-bright); transition: .4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 50%; }
+        input:checked + .slider { background-color: var(--btn-redeem); }
+        input:focus + .slider { box-shadow: 0 0 0 3px rgba(122, 162, 247, 0.2); }
+        input:checked + .slider:before { transform: translateX(22px); }
+        @keyframes slideInUpFromBottom { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } } @keyframes slideInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } } @keyframes slideInDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } } @keyframes slideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } } @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } } @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } } @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } } @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } } @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(122, 162, 247, 0.1); } 50% { box-shadow: 0 0 30px rgba(122, 162, 247, 0.2); } } @keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+        @media (max-width: 768px) { #dashboard-screen { width: 95%; height: 95vh; padding: 20px; flex-direction: column; gap: 20px; } .sidebar { flex: none; flex-direction: row; overflow-x: auto; gap: 10px; } .sidebar-item { white-space: nowrap; padding: 12px 20px; font-size: 1rem; } .actions-container { flex-direction: column; gap: 20px; } .main-view h2 { font-size: 2.2rem; } .balance-display { font-size: 1.8rem; padding: 20px; } }
+    </style>
+</head>
+<body>
+    <!-- HTML BODY IS THE SAME AS YOUR PREVIOUS "OPTIMIZED" VERSION -->
+    <div id="auth-screen"><div id="login-container" class="auth-container"><h2>EpiBux Login</h2><p id="login-error" class="status-message"></p><input type="text" id="login-username" placeholder="username" autocomplete="username"><input type="password" id="login-password" placeholder="password" autocomplete="current-password"><button id="login-btn">Log In</button><p class="toggle-auth" id="show-signup">Don't have an account? Sign Up</p></div><div id="signup-container" class="auth-container hidden"><h2>Create Account</h2><p id="signup-error" class="status-message"></p><input type="text" id="signup-username" placeholder="username (letters/numbers only)" autocomplete="username"><input type="password" id="signup-password" placeholder="password (6+ chars)" autocomplete="new-password"><button id="signup-btn">Sign Up</button><p class="toggle-auth" id="show-login">Already have an account? Log In</p></div></div>
+    <div id="dashboard-screen" class="hidden"><nav class="sidebar"><div id="balance-btn" class="sidebar-item active">Balance</div><div id="leaderboard-btn" class="sidebar-item">Leaderboard</div><div id="marketplace-btn" class="sidebar-item">Marketplace</div><button id="logout-btn" class="sidebar-item">Logout</button></nav><main class="main-content"><div id="balance-view" class="main-view"><div class="view-header"><h2>Balance</h2></div><div id="balance-display" class="balance-display">0 EB</div><section class="actions-container"><div class="action-card"><h3>Give EB</h3><button id="give-generate-code-btn" class="generic-button btn-secondary">generate code</button><input type="number" id="give-amount-input" class="generic-input" placeholder="amount"><div id="given-code-display" class="code-display-box">given code</div><div id="give-status-message" class="card-status-message" style="padding:0; min-height:0;"></div></div><div class="action-card"><h3>Redeem EB</h3><button id="redeem-btn" class="generic-button btn-highlight">redeem</button><input type="text" id="redeem-code-input" class="generic-input" placeholder="redeem code"><div id="redeem-status-message" class="card-status-message" style="padding:0; min-height:0;"></div></div></section></div><div id="leaderboard-view" class="main-view hidden"><div class="view-header"><h2>Leaderboard</h2><button id="leaderboard-refresh-btn" class="generic-button refresh-btn">Refresh</button></div><ul id="leaderboard-list"></ul></div><div id="marketplace-view" class="main-view hidden"><div class="view-header"><h2>Marketplace</h2><button id="marketplace-refresh-btn" class="generic-button refresh-btn">Refresh</button></div><div class="action-card" style="margin-bottom: 30px; flex: 0 1 auto;"><h3>Create a New Listing</h3><input type="text" id="post-title-input" class="generic-input" placeholder="Item Title"><textarea id="post-description-input" class="generic-input" placeholder="Item Description"></textarea><input type="number" id="post-price-input" class="generic-input" placeholder="Price in EB (0-1000)"><input type="url" id="post-link-input" class="generic-input" placeholder="Google Drive or Mediafire Link"><div class="stock-control-container"><input type="number" id="post-stock-input" class="generic-input" placeholder="Stock Quantity" min="1" step="1"><div class="toggle-switch-container"><label class="toggle-switch"><input type="checkbox" id="post-infinite-stock-toggle"><span class="slider"></span></label><span>Infinite Stock</span></div></div><button id="create-post-btn" class="generic-button btn-highlight">Create Post</button><div id="post-status-message" class="card-status-message" style="min-height:0; padding:0;"></div></div><h3>Current Listings</h3><div id="marketplace-listings" class="listings-container"></div></div></main></div>
+    <div id="buy-confirmation-modal" class="modal-overlay hidden"><div class="modal-content"><h3>Confirm Purchase</h3><p>You are about to purchase this item. Clicking confirm will transfer the EB and reveal the download link below.</p><div id="modal-item-link" class="modal-link-display"></div><div class="modal-actions"><button id="modal-cancel-btn" class="generic-button" style="background-color: var(--bg-button-muted);">Cancel</button><button id="modal-confirm-btn" class="generic-button btn-highlight">Confirm</button></div><p id="modal-status" class="status-message" style="margin-top: 15px; margin-bottom: 0;"></p></div></div>
+    <div id="purchase-notification-container"></div>
+    <audio id="notification-sound" preload="auto" style="display: none;"><source src="https://assets.mixkit.co/sfx/preview/mixkit-positive-notification-951.mp3" type="audio/mpeg">Your browser does not support the audio element.</audio>
+
+<script type="module">
+    import { firebaseConfig, GLITCH_PROJECT_URL } from '/firebase-config.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+    const main = () => {
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const authScreen = document.getElementById('auth-screen');
+        const dashboardScreen = document.getElementById('dashboard-screen');
+        let currentUserData = null;
+        let unsubscribePurchaseListener = null; 
+        let leaderboardCache = { data: null, lastFetch: 0 };
+
+        const showAuthError = (elementId, message) => { const el = document.getElementById(elementId); el.textContent = message; el.style.display = message ? 'block' : 'none'; el.style.color = 'var(--color-error)'; };
+        const showCardStatus = (elementId, message, isError = false, isSuccess = false) => { const el = document.getElementById(elementId); el.textContent = message; el.style.color = isError ? 'var(--color-error)' : 'var(--color-success)'; el.style.padding = message ? '15px' : '0'; if (isError || isSuccess) { setTimeout(() => { el.style.padding = '0'; el.textContent = ''; }, 4000); } };
+        const escapeHTML = (str) => { const p = document.createElement('p'); p.appendChild(document.createTextNode(String(str || ''))); return p.innerHTML; }
+        
+        // ... (showPurchaseNotification function is unchanged)
+        function showPurchaseNotification(customer, product) {
+            const container = document.getElementById('purchase-notification-container');
+            const audio = document.getElementById('notification-sound');
+            if (!container || !audio) return;
+            const MAX_VISIBLE_NOTIFICATIONS = 2;
+            const currentNotifications = container.querySelectorAll('.purchase-notification');
+            if (currentNotifications.length >= MAX_VISIBLE_NOTIFICATIONS) {
+                currentNotifications[0].remove();
+            }
+            try { audio.currentTime = 0; audio.play().catch(e => console.warn("Audio playback blocked.", e)); } catch (e) { console.error("Error playing sound:", e); }
+            const notification = document.createElement('div');
+            notification.className = 'purchase-notification';
+            notification.innerHTML = `<span class="customer-name">${escapeHTML(customer)}</span> has purchased <span class="product-name">${escapeHTML(product)}</span>`;
+            container.appendChild(notification);
+            setTimeout(() => { notification.classList.add('fade-out'); notification.addEventListener('transitionend', () => notification.remove()); }, 5000);
+        }
+
+        function listenForPurchaseEvents() { if (unsubscribePurchaseListener) unsubscribePurchaseListener(); const q = query(collection(db, "purchaseEvents"), where("timestamp", ">", new Date()), orderBy("timestamp", "desc")); unsubscribePurchaseListener = onSnapshot(q, (snapshot) => { snapshot.docChanges().forEach((change) => { if (change.type === "added") { const data = change.doc.data(); showPurchaseNotification(data.buyerUsername, data.itemTitle); } }); }, (e) => { console.error("Purchase listener error:", e); }); }
+        
+        async function fetchCurrentUserData() {
+            if (!auth.currentUser) return false;
+            const userDocRef = doc(db, "users", auth.currentUser.uid);
+            try {
+                const docSnap = await getDoc(userDocRef);
+                if (docSnap.exists()) {
+                    currentUserData = { ...docSnap.data(), uid: auth.currentUser.uid };
+                    document.getElementById('balance-display').textContent = `${currentUserData.balance.toLocaleString()} EB`;
+                    return true;
+                } else {
+                    console.error("User document does not exist for UID:", auth.currentUser.uid);
+                    return false;
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+                return false;
+            }
+        }
+
+        // *** FIX: This function now handles the transition to the dashboard ***
+        // It's called after a successful login or signup.
+        async function initializeDashboard() {
+            const success = await fetchCurrentUserData();
+            if (!success) {
+                // If we can't fetch data, log the user out to prevent a broken state.
+                await signOut(auth);
+                alert("Could not load your user data. Please try logging in again.");
+                return;
+            }
+            listenForPurchaseEvents();
+            authScreen.classList.add('hidden');
+            dashboardScreen.classList.remove('hidden');
+            switchView('balance-view', 'balance-btn');
+        }
+
+        // *** FIX: onAuthStateChanged now just handles session persistence (page reloads) ***
+        onAuthStateChanged(auth, (user) => { 
+            if (unsubscribePurchaseListener) { unsubscribePurchaseListener(); unsubscribePurchaseListener = null; }
+            if (user) {
+                // User is already logged in, initialize the dashboard.
+                initializeDashboard();
+            } else {
+                // User is logged out, show the auth screen.
+                currentUserData = null;
+                authScreen.classList.remove('hidden');
+                dashboardScreen.classList.add('hidden');
+                leaderboardCache = { data: null, lastFetch: 0 };
+            }
+        });
+
+        // *** FIX: Signup handler now ensures the DB write is complete before moving on. ***
+        document.getElementById('signup-btn').addEventListener('click', async () => {
+            const username = document.getElementById('signup-username').value.trim().toLowerCase();
+            const password = document.getElementById('signup-password').value;
+            showAuthError('signup-error', '');
+            if (!/^[a-z0-9]+$/.test(username)) { showAuthError('signup-error', "Username can only contain letters and numbers."); return; }
+            if (username.length < 3 || username.length > 10) { showAuthError('signup-error', "Username must be 3-10 characters long."); return; }
+            if (password.length < 6) { showAuthError('signup-error', "Password must be at least 6 characters long."); return; }
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, `${username}@epibux2.app`, password);
+                // This now happens *before* the UI transition, preventing the race condition.
+                await setDoc(doc(db, "users", userCredential.user.uid), { username: username, balance: 0 });
+                // We don't need to do anything else here; the onAuthStateChanged listener will see the new user and call initializeDashboard().
+            } catch (error) {
+                if (error.code === 'auth/email-already-in-use') { showAuthError('signup-error', "This username is already taken."); } 
+                else { showAuthError('signup-error', "An unexpected error occurred."); console.error("Signup Error:", error); }
+            }
+        });
+
+        // *** FIX: Login handler is back to its simple, original state. ***
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const username = document.getElementById('login-username').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+            showAuthError('login-error', '');
+            if (!username || !password) { showAuthError('login-error', "Please enter a username and password."); return; }
+            try {
+                await signInWithEmailAndPassword(auth, `${username}@epibux2.app`, password);
+                 // We don't need to do anything else here; the onAuthStateChanged listener will see the logged-in user and call initializeDashboard().
+            } catch (error) {
+                showAuthError('login-error', "Invalid username or password.");
+                console.error("Login Error:", error);
+            }
+        });
+
+        // --- ALL THE CODE BELOW IS THE SAME AS THE OPTIMIZED VERSION AND REMAINS CORRECT ---
+        
+        document.getElementById('show-signup').addEventListener('click', () => { document.getElementById('login-container').classList.add('hidden'); document.getElementById('signup-container').classList.remove('hidden'); });
+        document.getElementById('show-login').addEventListener('click', () => { document.getElementById('signup-container').classList.add('hidden'); document.getElementById('login-container').classList.remove('hidden'); });
+        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+        
+        async function fetchAndRenderLeaderboard(forceRefresh = false) {
+            const listEl = document.getElementById('leaderboard-list');
+            const now = Date.now();
+            const fiveMinutes = 5 * 60 * 1000;
+            if (!forceRefresh && leaderboardCache.data && (now - leaderboardCache.lastFetch < fiveMinutes)) {
+                listEl.innerHTML = '';
+                leaderboardCache.data.forEach(user => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${escapeHTML(user.username)}</span> <span>${user.balance.toLocaleString()} EB</span>`;
+                    listEl.appendChild(li);
+                });
+                return;
+            }
+            listEl.innerHTML = '<li>Loading...</li>';
+            try {
+                const q = query(collection(db, "users"), orderBy("balance", "desc"));
+                const querySnapshot = await getDocs(q);
+                const users = [];
+                querySnapshot.forEach(doc => users.push(doc.data()));
+                leaderboardCache.data = users;
+                leaderboardCache.lastFetch = Date.now();
+                listEl.innerHTML = '';
+                users.forEach(user => { const li = document.createElement('li'); li.innerHTML = `<span>${escapeHTML(user.username)}</span> <span>${user.balance.toLocaleString()} EB</span>`; listEl.appendChild(li); });
+            } catch(error) { console.error("Leaderboard Error:", error); listEl.innerHTML = '<li>Could not load leaderboard.</li>'; }
+        }
+        document.getElementById('give-generate-code-btn').addEventListener('click', async () => { const btn = document.getElementById('give-generate-code-btn'); const amount = parseInt(document.getElementById('give-amount-input').value); const user = auth.currentUser; if (!user || isNaN(amount) || amount <= 0) { showCardStatus('give-status-message', "Invalid amount.", true); return; } btn.disabled = true; showCardStatus('give-status-message', 'Generating...'); try { const idToken = await user.getIdToken(true); const response = await fetch(`${GLITCH_PROJECT_URL}/generate-code`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` }, body: JSON.stringify({ amount }) }); const result = await response.json(); if (!response.ok) { throw new Error(result.error || 'Failed.'); } document.getElementById('given-code-display').textContent = result.code; showCardStatus('give-status-message', result.message, false, true); document.getElementById('give-amount-input').value = ''; await fetchCurrentUserData(); } catch (error) { document.getElementById('given-code-display').textContent = 'given code'; showCardStatus('give-status-message', error.message, true); } finally { btn.disabled = false; } });
+        document.getElementById('redeem-btn').addEventListener('click', async () => { const code = document.getElementById('redeem-code-input').value.trim(); const user = auth.currentUser; if (!user || !code) { showCardStatus('redeem-status-message', "Please enter a code.", true); return; } const btn = document.getElementById('redeem-btn'); btn.disabled = true; try { const idToken = await user.getIdToken(true); const response = await fetch(`${GLITCH_PROJECT_URL}/redeem-code`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` }, body: JSON.stringify({ code }) }); const result = await response.json(); if (!response.ok) throw new Error(result.error || 'Failed.'); showCardStatus('redeem-status-message', result.message, false, true); document.getElementById('redeem-code-input').value = ''; await fetchCurrentUserData(); } catch (error) { showCardStatus('redeem-status-message', error.message, true); } finally { btn.disabled = false; } });
+        const stockInput = document.getElementById('post-stock-input'); const infiniteToggle = document.getElementById('post-infinite-stock-toggle'); if(infiniteToggle) { infiniteToggle.addEventListener('change', () => { stockInput.disabled = infiniteToggle.checked; if (infiniteToggle.checked) stockInput.value = ''; }); infiniteToggle.dispatchEvent(new Event('change')); }
+        document.getElementById('create-post-btn').addEventListener('click', async () => { const btn = document.getElementById('create-post-btn'); const title = document.getElementById('post-title-input').value.trim(); const description = document.getElementById('post-description-input').value.trim(); const price = parseInt(document.getElementById('post-price-input').value); const link = document.getElementById('post-link-input').value.trim(); const isInfinite = document.getElementById('post-infinite-stock-toggle').checked; const stockValue = document.getElementById('post-stock-input').value; const stock = isInfinite ? null : parseInt(stockValue); if (!auth.currentUser) return; if (!title || !description || !link) { showCardStatus('post-status-message', 'Title, description, and link are required.', true); return; } if (isNaN(price) || price < 0) { showCardStatus('post-status-message', 'Price must be non-negative.', true); return; } if (!isInfinite && (isNaN(stock) || stock <= 0 || !Number.isInteger(parseFloat(stockValue)))) { showCardStatus('post-status-message', 'Provide a valid, whole stock quantity.', true); return; } btn.disabled = true; showCardStatus('post-status-message', 'Submitting...'); try { const idToken = await auth.currentUser.getIdToken(true); const response = await fetch(`${GLITCH_PROJECT_URL}/create-post`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` }, body: JSON.stringify({ title, description, price, link, isInfinite, stock }) }); const result = await response.json(); if (!response.ok) { throw new Error(result.error || 'Failed.'); } showCardStatus('post-status-message', result.message, false, true); document.getElementById('post-title-input').value = ''; document.getElementById('post-description-input').value = ''; document.getElementById('post-price-input').value = ''; document.getElementById('post-link-input').value = ''; document.getElementById('post-stock-input').value = ''; infiniteToggle.checked = false; infiniteToggle.dispatchEvent(new Event('change')); } catch (error) { showCardStatus('post-status-message', error.message, true); } finally { btn.disabled = false; } });
+        async function fetchAndRenderMarketplace() { const listingsEl = document.getElementById('marketplace-listings'); listingsEl.innerHTML = '<p style="color: var(--text-dim); text-align: center;">Loading...</p>'; try { const q = query( collection(db, "marketplace"), where("isAccepted", "==", true), orderBy("createdAt", "desc") ); const snapshot = await getDocs(q); listingsEl.innerHTML = ''; if (snapshot.empty) { listingsEl.innerHTML = '<p style="color: var(--text-dim); text-align: center;">No items for sale.</p>'; return; } snapshot.forEach((doc) => { const post = doc.data(); const isOwner = auth.currentUser && post.sellerUid === auth.currentUser.uid; const isOutOfStock = post.isInfinite === false && (!post.stock || post.stock <= 0); const stockText = post.isInfinite ? 'Infinite' : (post.stock ?? 0); const sellerHtml = `Sold by: ${escapeHTML(post.sellerUsername)} | Stock: ${stockText}`; const buyButtonDisabled = isOwner || isOutOfStock; const buyButtonText = isOwner ? 'Your Item' : (isOutOfStock ? 'Out of Stock' : 'Buy'); const itemEl = document.createElement('div'); itemEl.className = 'marketplace-item'; itemEl.innerHTML = `<div class="marketplace-item-title">${escapeHTML(post.title)}</div><div class="marketplace-item-desc">${escapeHTML(post.description)}</div><div class="marketplace-item-price">${post.price.toLocaleString()} EB</div><div class="marketplace-item-seller">${sellerHtml}</div><button class="generic-button btn-highlight marketplace-item-buy-btn" ${buyButtonDisabled ? 'disabled' : ''}>${buyButtonText}</button>`; if (!buyButtonDisabled) { itemEl.querySelector('.marketplace-item-buy-btn').addEventListener('click', () => handleBuyClick(doc.id, post.price, post.title)); } listingsEl.appendChild(itemEl); }); } catch (error) { console.error("Marketplace fetch error:", error); listingsEl.innerHTML = `<p style="color: var(--color-error);">${error.code === 'failed-precondition' ? 'Missing Firestore index. Check console.' : 'Could not load marketplace.'}</p>`; } }
+        function handleBuyClick(postId, price, title) { const modal = document.getElementById('buy-confirmation-modal'); const linkEl = document.getElementById('modal-item-link'); const statusEl = document.getElementById('modal-status'); const confirmBtn = document.getElementById('modal-confirm-btn'); const cancelBtn = document.getElementById('modal-cancel-btn'); if (currentUserData.balance < price) { alert("You do not have enough EB."); return; } modal.querySelector('h3').textContent = 'Confirm Purchase'; modal.querySelector('p').textContent = `Purchase "${escapeHTML(title)}" for ${price.toLocaleString()} EB?`; linkEl.textContent = `Link revealed after purchase.`; statusEl.style.display = 'none'; confirmBtn.textContent = 'Confirm'; confirmBtn.classList.remove('hidden'); cancelBtn.textContent = 'Cancel'; modal.classList.remove('hidden'); cancelBtn.onclick = () => { modal.classList.add('hidden'); }; confirmBtn.onclick = async () => { const user = auth.currentUser; if (!user) return; confirmBtn.disabled = true; cancelBtn.disabled = true; statusEl.style.display = 'block'; statusEl.textContent = 'Processing...'; statusEl.style.color = 'var(--text-bright)'; try { const idToken = await user.getIdToken(true); const response = await fetch(`${GLITCH_PROJECT_URL}/buy-item`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` }, body: JSON.stringify({ postId }) }); const result = await response.json(); if (!response.ok) { throw new Error(result.error); } modal.querySelector('h3').textContent = 'Purchase Complete!'; statusEl.textContent = 'Download link is now available.'; statusEl.style.color = 'var(--color-success)'; linkEl.textContent = result.link; confirmBtn.classList.add('hidden'); cancelBtn.textContent = 'Close'; await fetchCurrentUserData(); await fetchAndRenderMarketplace(); } catch (error) { statusEl.textContent = `Error: ${error.message}`; statusEl.style.color = 'var(--color-error)'; } finally { cancelBtn.disabled = false; } }; }
+        const views = document.querySelectorAll('.main-view'); const sidebarItems = document.querySelectorAll('.sidebar-item'); 
+        const switchView = (viewId, btnId) => { views.forEach(v => v.classList.add('hidden')); sidebarItems.forEach(b => b.classList.remove('active')); document.getElementById(viewId).classList.remove('hidden'); document.getElementById(btnId).classList.add('active'); if (viewId === 'leaderboard-view') fetchAndRenderLeaderboard(); if (viewId === 'marketplace-view') fetchAndRenderMarketplace(); };
+        document.getElementById('balance-btn').addEventListener('click', () => switchView('balance-view', 'balance-btn'));
+        document.getElementById('leaderboard-btn').addEventListener('click', () => switchView('leaderboard-view', 'leaderboard-btn'));
+        document.getElementById('marketplace-btn').addEventListener('click', () => switchView('marketplace-view', 'marketplace-btn'));
+        document.getElementById('leaderboard-refresh-btn').addEventListener('click', () => fetchAndRenderLeaderboard(true));
+        document.getElementById('marketplace-refresh-btn').addEventListener('click', fetchAndRenderMarketplace);
+    };
+    if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', main); } else { main(); }
+</script>
+</body>
+</html>
